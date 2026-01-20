@@ -1,0 +1,83 @@
+name: Package
+on:
+  workflow_dispatch:
+    inputs:
+      build:
+        description: 'Build wheels'
+        required: true
+        type: boolean
+        default: true
+      release:
+        description: 'Release wheels'
+        required: true
+        type: boolean
+        default: false
+
+jobs:
+  build_wheels:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-15-intel, macos-latest, windows-latest, windows-11-arm]
+
+    if: ${{ inputs.build }}
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install the Rust toolchain
+      if: ${{ !startsWith(matrix.os, 'ubuntu') }}
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: 3.11
+
+    - name: Build wheels
+      uses: pypa/cibuildwheel@v3.3.0
+
+    - uses: actions/setup-python@v5
+      if: ${{ matrix.os != 'windows-11-arm' }}
+      with:
+        python-version: 3.8
+
+    - name: Test wheel
+      shell: bash
+      run: |
+        echo "Using $(which python)"
+        mkdir test-${{ matrix.os }} && cd test-${{ matrix.os }}
+        ln -s ../tests
+        ln -s ../README.md
+        export PYTHONPATH="$PWD/packages"
+
+        python -s -m pip install ../wheelhouse/*.whl --target=packages
+        python -s -m pip install pytest --target=packages
+        python -s -m pytest --doctest-glob="*.md" --ignore=packages -v .
+
+    - name: Upload artifacts
+      if: (github.ref == 'refs/heads/master')
+      uses: actions/upload-artifact@v4
+      with:
+        name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+        path: ./wheelhouse/*.whl
+
+  release_wheels:
+    name: Release wheels
+    needs: build_wheels
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    if: ${{ inputs.release }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+          path: dist
+
+      - uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/parma-*.whl
+          tag: v0.1.0
+          overwrite: true
+          file_glob: true

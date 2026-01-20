@@ -1,0 +1,45 @@
+[tool.bumpversion]
+commit = true
+current_version = "0.1.0"
+message = 'Bump version: v{new_version}'
+tag = true
+tag_name = "v{new_version}"
+tag_message = "Parma v{new_version}"
+
+[[tool.bumpversion.files]]
+filename = "Cargo.toml"
+search = '''
+[package]
+name = "parma"
+version = "{current_version}"
+'''
+replace = '''
+[package]
+name = "parma"
+version = "{new_version}"
+'''
+
+[[tool.bumpversion.files]]
+filename = 'pyproject.toml'
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = 'src/python/parma/__init__.py'
+search = 'VERSION = "{current_version}"'
+replace = 'VERSION = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = 'README.md'
+search = 'releases/download/v{current_version}/parma-{current_version}'
+replace = 'releases/download/v{new_version}/parma-{new_version}'
+
+[[tool.bumpversion.files]]
+filename = 'README.md'
+search = 'releases/tag/v{current_version}'
+replace = 'releases/tag/v{new_version}'
+
+[[tool.bumpversion.files]]
+filename = '.github/workflows/package.yml'
+search = 'tag: v{current_version}'
+replace = 'tag: v{new_version}'
