@@ -140,7 +140,7 @@ impl Fluxmeter {
                 },
             },
         };
-        let grid = grid.unwrap_or(false);
+        let grid = if is_me { true } else { grid.unwrap_or(false) };
         let geometry: c_double = self.geometry.into();
         let (m, iang, shape) = match &theta {
             Some(theta) => {

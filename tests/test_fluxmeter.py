@@ -59,3 +59,5 @@ def test_fluxmeter():
     meter = parma.Fluxmeter()
     assert_allclose(meter.flux(22, "me"), 0.00550347, atol=1E-06)
     assert_allclose(meter.flux(22, "me", theta=0), 0.00110993, atol=1E-06)
+    assert_allclose(meter.flux(22, "me", theta=(0, 90)), (0.00110993, 0.000267),
+                    atol=1E-06)

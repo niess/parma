@@ -19,7 +19,7 @@ for Linux, OSX and Windows. For instance, on an `x86_64` Linux Parma can be
 installed as
 
 ```
-pip install https://github.com/niess/parma/releases/download/v0.1.0/parma-0.1.0-cp38-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
+pip install https://github.com/niess/parma/releases/download/v0.1.1/parma-0.1.1-cp38-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
 ```
 
 Alternatively, in order to build Parma from the source, the [Rust
@@ -50,6 +50,6 @@ Python package thus implies compliance with both **A** and **B**.
 [COPYING]: https://github.com/niess/parma/blob/master/COPYING.LESSER
 [EXPACS_LICENSE]: https://phits.jaea.go.jp/expacs/
 [LICENSE]: https://github.com/niess/parma/blob/master/LICENSE
-[LATEST_RELEASE]: https://github.com/niess/parma/releases/tag/v0.1.0
+[LATEST_RELEASE]: https://github.com/niess/parma/releases/tag/v0.1.1
 [RUST_TOOLCHAIN]: https://www.rust-lang.org/tools/install
 [SAT16]: https://doi.org/10.1371/journal.pone.0160390
