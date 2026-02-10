@@ -1623,7 +1623,7 @@ return getd;
 }
 
 // ******************************************************
-double get511fluxCpp(double s, double r, double d) // get 511 keV photon flux in (/cm2/s)
+extern "C" double get511fluxCpp(double s, double r, double d) // get 511 keV photon flux in (/cm2/s)
 // ******************************************************
 {
 double get511flux;

@@ -54,3 +54,8 @@ def test_fluxmeter():
     assert flux.shape == (2, 3)
     assert_allclose(flux[:,0], flux[:,1])
     assert_allclose(flux[:,0], flux[:,2])
+
+    # Test the 511 kev emission line.
+    meter = parma.Fluxmeter()
+    assert_allclose(meter.flux(22, "me"), 0.00550347, atol=1E-06)
+    assert_allclose(meter.flux(22, "me", theta=0), 0.00110993, atol=1E-06)

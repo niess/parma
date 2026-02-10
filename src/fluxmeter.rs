@@ -38,6 +38,12 @@ enum DateArg {
     Date(NaiveDate),
 }
 
+#[derive(FromPyObject)]
+enum EnergyArg<'py> {
+    Array(AnyArray<'py, c_double>),
+    String(String),
+}
+
 #[pymethods]
 impl Fluxmeter {
     #[pyo3(
@@ -98,16 +104,43 @@ impl Fluxmeter {
     fn flux<'py>(
         &self,
         particle: ParticleArg,
-        energy: AnyArray<'py, c_double>,
+        energy: EnergyArg<'py>,
         theta: Option<AnyArray<'py, c_double>>,
         atmospheric_depth: Option<c_double>,
         cutoff_rigidity: Option<c_double>,
         grid: Option<bool>,
         solar_activity: Option<c_double>,
+        py: Python<'py>,
     ) -> PyResult<NewArray<'py, c_double>> {
-        let py = energy.py();
-        let grid = grid.unwrap_or(false);
         let particle: Particle = particle.try_into()?;
+        let (energy, is_me) = match energy {
+            EnergyArg::Array(array) => (array, false),
+            EnergyArg::String(energy) => match particle {
+                Particle::Photon => match energy.to_lowercase().as_str() {
+                    "me" | "m_e" => {
+                        let array = NewArray::empty(py, [])?;
+                        array.set_item(0, 0.51099895)?;
+                        let array = AnyArray::Owned(array.into_bound());
+                        (array, true)
+                    },
+                    _ => {
+                        let msg = format!(
+                            "bad energy (expected numeric value(s) or 'me', found '{}')",
+                            energy,
+                        );
+                        return Err(PyTypeError::new_err(msg))
+                    },
+                },
+                _ => {
+                    let msg = format!(
+                        "bad energy (expected numeric value(s), found '{}')",
+                        energy,
+                    );
+                    return Err(PyTypeError::new_err(msg))
+                },
+            },
+        };
+        let grid = grid.unwrap_or(false);
         let geometry: c_double = self.geometry.into();
         let (m, iang, shape) = match &theta {
             Some(theta) => {
@@ -151,7 +184,11 @@ impl Fluxmeter {
         let flux = array.as_slice_mut();
         for i in 0..energy.size() {
             let ei = energy.get_item(i)?;
-            let fi = unsafe { parma::getSpec(particle, s, r, d, ei, geometry) };
+            let fi = if is_me {
+                unsafe { parma::get511flux(s, r, d) }
+            } else {
+                unsafe { parma::getSpec(particle, s, r, d, ei, geometry) }
+            };
             match &theta {
                 Some(theta) => if grid {
                     for j in 0..m {

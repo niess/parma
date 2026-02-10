@@ -29,6 +29,8 @@ unsafe extern "C" {
     #[link_name="getHPcpp"]
     pub fn getHP(iy0: c_int, im0: c_int, id0: c_int) -> c_double;
 
+    #[link_name="get511fluxCpp"]
+    pub fn get511flux(s: c_double, r: c_double, d: c_double) -> c_double;
 
     #[link_name="getSpecCpp"]
     pub fn getSpec(
